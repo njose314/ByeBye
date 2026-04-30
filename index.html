@@ -7,17 +7,18 @@
 <style>
     :root {
         --bg-color: #E6E2D9; 
-        --card-bg: rgba(26, 26, 28, 0.88); 
-        --text-main: #FDFBEE;
-        --accent: #C7A656; 
-        --shape-idle: rgba(255, 255, 255, 0.15);
-        --box-border: rgba(255, 255, 255, 0.25);
+        --text-main: #1C1C1E;
+        --text-body: #4A4A4E;
+        --accent: #B08D38; /* Darker gold for light background contrast */
+        --shape-idle: rgba(0, 0, 0, 0.06);
+        --box-border: rgba(0, 0, 0, 0.2);
         --transition-std: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     body {
         margin: 0; padding: 0;
         height: 100vh;
+        width: 100vw;
         display: flex; justify-content: center; align-items: center;
         background: var(--bg-color);
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -25,18 +26,26 @@
         user-select: none; 
     }
 
+    /* Screen shake animation */
+    @keyframes subtleShake {
+        0% { transform: translate(0, 0) rotate(0deg); }
+        20% { transform: translate(-3px, 2px) rotate(-0.5deg); }
+        40% { transform: translate(3px, -2px) rotate(0.5deg); }
+        60% { transform: translate(-2px, -1px) rotate(-0.5deg); }
+        80% { transform: translate(2px, 1px) rotate(0.5deg); }
+        100% { transform: translate(0, 0) rotate(0deg); }
+    }
+
+    .shake-active {
+        animation: subtleShake 0.35s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    /* Constrains the playable area to a perfect 9:16 aspect ratio */
     .frame-container {
-        background: var(--card-bg);
-        backdrop-filter: blur(25px);
-        -webkit-backdrop-filter: blur(25px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 20px;
-        width: 90%;
-        max-width: 650px;
-        height: 450px;
-        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
-        display: flex; flex-direction: column;
-        padding: 40px;
+        width: 100%;
+        height: 100%;
+        max-width: 56.25vh; /* Maps max width to 9:16 based on viewport height */
+        max-height: 100vh;
         position: relative;
     }
 
@@ -50,24 +59,30 @@
     #protocol-outcome {
         display: none;
         opacity: 0;
-        text-align: left;
+        text-align: center;
         color: var(--text-main);
         transition: var(--transition-std);
-        margin-top: 20px;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 100%;
+        padding: 0 30px;
+        box-sizing: border-box;
     }
 
     h1 {
-        font-size: 1.6rem; font-weight: 500;
-        letter-spacing: 2px; text-transform: uppercase;
-        margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1);
+        font-size: 1.8rem; font-weight: 600;
+        letter-spacing: 1.5px; text-transform: uppercase;
+        margin-bottom: 25px; border-bottom: 2px solid rgba(0,0,0,0.08);
         padding-bottom: 15px; color: var(--text-main);
     }
 
     .letter-body {
-        font-size: 1.05rem; line-height: 1.7; color: #E0DFE5;
+        font-size: 1.1rem; line-height: 1.6; color: var(--text-body);
+        text-align: left;
     }
 
-    .sig { margin-top: 30px; color: var(--accent); font-style: italic;}
+    .sig { margin-top: 30px; color: var(--accent); font-style: italic; font-weight: 500;}
 
     /* Bounding Boxes */
     .target-guide {
@@ -75,20 +90,20 @@
         border: 2px dashed var(--box-border);
         box-sizing: border-box;
         pointer-events: none;
-        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
     .target-guide.filled {
         border-color: var(--accent);
         border-style: solid;
-        box-shadow: 0 0 15px rgba(199, 166, 86, 0.2);
+        box-shadow: 0 0 20px rgba(176, 141, 56, 0.3);
     }
 
-    /* Target specific shapes (using percentages for responsive layout) */
-    #circle-target { left: 15%; top: 25%; width: 90px; height: 90px; border-radius: 50%; }
-    #square-target { left: 42%; top: 25%; width: 90px; height: 90px; border-radius: 8px; }
-    #triangle-target { left: 69%; top: 25%; width: 90px; height: 90px; clip-path: polygon(50% 0%, 0% 100%, 100% 100%); }
-    #rect-target { left: 25%; top: 60%; width: 280px; height: 50px; border-radius: 8px; }
+    /* Target specific shapes (Vertical layout) */
+    #circle-target { left: 20%; top: 15%; width: 85px; height: 85px; border-radius: 50%; }
+    #square-target { left: 55%; top: 32%; width: 85px; height: 85px; border-radius: 8px; }
+    #triangle-target { left: 20%; top: 49%; width: 85px; height: 85px; clip-path: polygon(50% 0%, 0% 100%, 100% 100%); }
+    #rect-target { left: 15%; top: 70%; width: 70%; height: 55px; border-radius: 8px; }
 
     /* Draggable Shapes */
     .shape {
@@ -96,7 +111,7 @@
         background-color: var(--shape-idle);
         cursor: grab;
         box-sizing: border-box;
-        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        transition: background-color 0.2s ease, box-shadow 0.2s ease;
     }
 
     .shape:active { cursor: grabbing; }
@@ -104,14 +119,14 @@
     .shape.locked {
         background-color: var(--accent);
         cursor: default;
-        box-shadow: 0 0 20px rgba(199, 166, 86, 0.4);
+        box-shadow: 0 0 25px rgba(176, 141, 56, 0.5);
     }
 
-    /* Start positions: Intentionally misaligned by 10-30px */
-    #circle { width: 90px; height: 90px; border-radius: 50%; left: calc(15% - 15px); top: calc(25% + 18px); }
-    #square { width: 90px; height: 90px; border-radius: 8px; left: calc(42% + 20px); top: calc(25% - 12px); }
-    #triangle { width: 90px; height: 90px; clip-path: polygon(50% 0%, 0% 100%, 100% 100%); left: calc(69% - 18px); top: calc(25% + 22px); }
-    #rect { width: 280px; height: 50px; border-radius: 8px; left: calc(25% + 15px); top: calc(60% - 15px); }
+    /* Start positions: Intentionally misaligned */
+    #circle { width: 85px; height: 85px; border-radius: 50%; left: calc(20% - 15px); top: calc(15% + 22px); }
+    #square { width: 85px; height: 85px; border-radius: 8px; left: calc(55% + 18px); top: calc(32% - 15px); }
+    #triangle { width: 85px; height: 85px; clip-path: polygon(50% 0%, 0% 100%, 100% 100%); left: calc(20% + 20px); top: calc(49% + 18px); }
+    #rect { width: 70%; height: 55px; border-radius: 8px; left: calc(15% - 12px); top: calc(70% - 20px); }
 
 </style>
 </head>
@@ -120,28 +135,26 @@
 <div class="frame-container">
     
     <div id="workspace">
-        <!-- Target Guides (Bounding Boxes) -->
         <div id="circle-target" class="target-guide"></div>
         <div id="square-target" class="target-guide"></div>
         <div id="triangle-target" class="target-guide"></div>
         <div id="rect-target" class="target-guide"></div>
 
-        <!-- Draggable Shapes -->
         <div id="circle" class="shape" data-target="circle-target"></div>
         <div id="square" class="shape" data-target="square-target"></div>
         <div id="triangle" class="shape" data-target="triangle-target"></div>
         <div id="rect" class="shape" data-target="rect-target"></div>
     </div>
 
-    <!-- Hidden Farewell Message -->
     <div id="protocol-outcome">
-        <h1>Hundred Percent Aligned.</h1>
+        <h1>Hundred Percent Aligned!
+        </h1>
         <div class="letter-body">
-            <p><strong>To Allam,</strong></p>
-            <p>We knew you wouldn't be able to just leave them like that. It’s that exact instinct—your drive to take things from "almost there" to absolutely perfect—that made you so vital to this team.</p>
-            <p>Your obsession with quality and getting things into perfect alignment has elevated every project you've touched here. While we are genuinely sad to see you log out for the last time, we are so incredibly excited to see what you build next.</p>
-            <p>Don't just build. Build to perfection. Stay in touch.</p>
-            <p class="sig">— The Whole Team.</p>
+            <p><strong>Dear Allam,</strong></p>
+            <p>We knew you wouldn't be able to just leave them like that. It’s that exact instinct - your drive to take things from "almost there" to absolutely perfect - that made you so vital to our team.</p>
+            <p>Your obsession with quality and getting things into perfect alignment has elevated our working style and everything you've touched. While we are genuinely sad to see you log out for the last time, we are so incredibly excited to see what you align for yourself next.</p>
+            <p>Always do what makes you happy. Stay in touch.</p>
+            <p class="sig">— The Whole Team</p>
         </div>
     </div>
 
@@ -154,7 +167,14 @@
 
     let currentZ = 10; 
     let lockedCount = 0;
-    const SNAP_TOLERANCE = 20; 
+    const SNAP_TOLERANCE = 22; 
+
+    // Trigger the subtle screen shake
+    function triggerShake() {
+        document.body.classList.remove('shake-active');
+        void document.body.offsetWidth; // Force reflow
+        document.body.classList.add('shake-active');
+    }
 
     shapes.forEach(shape => {
         let offsetX, offsetY;
@@ -226,13 +246,15 @@
             shape.style.left = target.style.left || targetX + 'px';
             shape.style.top = target.style.top || targetY + 'px';
             
-            // Re-apply percentage based positions to keep it responsive if resized after locking
+            // Re-apply percentage based positions to keep it responsive
             shape.style.left = getComputedStyle(target).left;
             shape.style.top = getComputedStyle(target).top;
 
             shape.classList.add('locked');
             target.classList.add('filled');
             lockedCount++;
+            
+            triggerShake(); // Call the impact animation
             
             if (lockedCount === shapes.length) {
                 showSuccess();
@@ -249,7 +271,7 @@
                 void outcome.offsetWidth; // Reflow
                 outcome.style.opacity = 1;
             }, 300);
-        }, 400); 
+        }, 600); // Leave a slightly longer pause after the final shake before fading
     }
 </script>
 
